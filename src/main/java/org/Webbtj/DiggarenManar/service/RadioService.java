@@ -17,14 +17,12 @@ public class RadioService {
     }
 
     public RadioSong getCurrentSong(String channel) {
-        // Bygg upp URL utifrån vald kanal
         String url = "https://api.sr.se/api/v2/playlist?channel=" + channel + "&format=json";
         try {
             ResponseEntity<RadioSongResponse> response = restTemplate.getForEntity(url, RadioSongResponse.class);
             if (response.getStatusCode().is2xxSuccessful() &&
                     response.getBody() != null &&
                     !response.getBody().getPlaylist().isEmpty()) {
-                // Här hämtas första låten i listan – anpassa om API-svaret skiljer sig
                 return response.getBody().getPlaylist().get(0);
             }
         } catch (Exception e) {

@@ -19,6 +19,7 @@ public class DiggarenManarApplication {
      * @param userService
      * @return
      */
+    /*
     @Bean
     CommandLineRunner run(UserService userService) {
         return args -> {
@@ -26,4 +27,5 @@ public class DiggarenManarApplication {
             System.out.println("✅ User added!");
         };
     }
+    */
 }

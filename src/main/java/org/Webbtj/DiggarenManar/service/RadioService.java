@@ -31,30 +31,30 @@ public class RadioService {
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-            // 🔹 **Logga API-svaret för debugging**
+            if(response.getStatusCode() != HttpStatus.OK){
+                System.err.println("API returnerade status: " + response.getStatusCode());
+                return getDefaultSong();
+            }
+
             System.out.println("📡 API Response: " + response.getBody());
 
-            // 🔹 **Konvertera JSON-svaret till ett objekt**
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
-
             JsonNode playlistNode = jsonNode.path("playlist");
-
-            // 🔹 **Hämta låten om den finns, annars ta `previoussong`**
             JsonNode songNode = playlistNode.path("song");
+
+
             if (songNode.isMissingNode()) { // Om det inte finns en "song", ta "previoussong"
-                songNode = playlistNode.path("previoussong");
+                return new RadioSong(
+                songNode.path("Title").asText("uknown song"),
+                songNode.path("artist").asText("unkown artist"),
+                songNode.path("start time").asText("N/A")
+                );
+
+            } else {
+                System.err.println(" no song was found");
             }
 
-            if (!songNode.isMissingNode()) {
-                RadioSong radioSong = new RadioSong();
-                radioSong.setArtist(songNode.path("artist").asText("Okänd artist"));
-                radioSong.setTitle(songNode.path("title").asText("Okänd låt"));
-                radioSong.setPlayedTime(songNode.path("starttimeutc").asText("N/A"));
-                return radioSong;
-            } else {
-                System.err.println("⚠️ Varken 'song' eller 'previoussong' hittades i API-svaret.");
-            }
 
         } catch (JsonProcessingException e) { // 🔹 **Hantera JSON-fel**
             System.err.println(" JSON-fel vid parsing av Sveriges Radio API: " + e.getMessage());
@@ -64,12 +64,10 @@ public class RadioService {
             System.err.println(" Oväntat fel i RadioService: " + e.getMessage());
         }
 
-        // 🔹 **Om vi misslyckas, returnera en placeholder-låt istället för null**
-        RadioSong fallbackSong = new RadioSong();
-        fallbackSong.setArtist("Okänd artist");
-        fallbackSong.setTitle("Ingen låt hittades");
-        fallbackSong.setPlayedTime("N/A");
+        return getDefaultSong();
+    }
 
-        return fallbackSong;
+    private RadioSong getDefaultSong(){
+        return new RadioSong("no song found", "unkown artist", "N/A");
     }
 }

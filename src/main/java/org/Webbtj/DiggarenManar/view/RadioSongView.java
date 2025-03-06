@@ -1,10 +1,12 @@
 package org.Webbtj.DiggarenManar.view;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -19,7 +21,10 @@ public class RadioSongView extends VerticalLayout {
     private final RadioService radioService;
     private final SpotifyService spotifyService;
 
-    private final Button fetchButton = new Button("Fetch Current Song");
+    private final ComboBox<String> channelSelector = new ComboBox<>("Välj Kanal");
+    private final RadioButtonGroup<String> songTypeSelector = new RadioButtonGroup<>();
+
+    private final Button fetchButton = new Button("Fetch Song");
     private final Label songInfo = new Label();
     private final Anchor spotifyLinkAnchor = new Anchor("", "Open in Spotify");
 
@@ -31,14 +36,26 @@ public class RadioSongView extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
 
+        channelSelector.setItems("P2 (163)", "P3 (164)", "P1 (132)");
+        channelSelector.setPlaceholder("Choose a channel");
+
+
         fetchButton.addClickListener(e -> fetchCurrentSong());
 
-        add(new H1("Current Radio Song"), fetchButton, songInfo, spotifyLinkAnchor);
+        add(new H1("Playing now"), channelSelector, fetchButton, songInfo, spotifyLinkAnchor);
     }
 
     private void fetchCurrentSong() {
-        String channel = "2576";
-        RadioSong radioSong = radioService.getCurrentSong(channel);
+
+        String selectedChannedl = channelSelector.getValue();
+        if(selectedChannedl == null){
+            songInfo.setText("Choose a channel first!" );
+            return;
+        }
+
+        String channelId = selectedChannedl.split(" ")[1].replace("(", "").replace(")", "");
+        RadioSong radioSong = radioService.getCurrentSong(channelId);
+
         if (radioSong != null) {
             String artist = radioSong.getArtist();
             String title = radioSong.getTitle();

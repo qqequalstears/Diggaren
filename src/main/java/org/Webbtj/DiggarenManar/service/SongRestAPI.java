@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+/*@RestController
 @RequestMapping("/api/song")
 public class SongRestAPI {
 
@@ -43,3 +43,5 @@ public class SongRestAPI {
         return ResponseEntity.ok(result);
     }
 }
+
+ */

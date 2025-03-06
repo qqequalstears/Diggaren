@@ -21,7 +21,7 @@ public class RadioSongView extends VerticalLayout {
     private final RadioService radioService;
     private final SpotifyService spotifyService;
 
-    private final ComboBox<String> channelSelector = new ComboBox<>("Välj Kanal");
+    private final ComboBox<String> channelSelector = new ComboBox<>("select channel");
     private final RadioButtonGroup<String> songTypeSelector = new RadioButtonGroup<>();
 
     private final Button fetchButton = new Button("Fetch Song");
@@ -39,6 +39,10 @@ public class RadioSongView extends VerticalLayout {
         channelSelector.setItems("P2 (163)", "P3 (164)", "P1 (132)");
         channelSelector.setPlaceholder("Choose a channel");
 
+        songTypeSelector.setLabel("Choose song type");
+        songTypeSelector.setItems("Current song", "Latest played song");
+        songTypeSelector.setValue("Current song");
+
 
         fetchButton.addClickListener(e -> fetchCurrentSong());
 
@@ -54,20 +58,18 @@ public class RadioSongView extends VerticalLayout {
         }
 
         String channelId = selectedChannedl.split(" ")[1].replace("(", "").replace(")", "");
-        RadioSong radioSong = radioService.getCurrentSong(channelId);
+        boolean fetchCurrent = songTypeSelector.getValue().equals("current song");
+        RadioSong radioSong = radioService.getSongByType(channelId, fetchCurrent);
 
-        if (radioSong != null) {
-            String artist = radioSong.getArtist();
-            String title = radioSong.getTitle();
-            String playedTime = radioSong.getPlayedTime();
-            String spotifyLink = spotifyService.generateSpotifySearchLink(artist + " " + title);
+        String artist = radioSong.getArtist();
+        String title = radioSong.getTitle();
+        String playedTime = radioSong.getPlayedTime();
+        String spotifyLink = spotifyService.generateSpotifySearchLink(artist + " " + title);
 
-            songInfo.setText("Now Playing: " + artist + " - " + title + " (" + playedTime + ")");
-            spotifyLinkAnchor.setHref(spotifyLink);
-            spotifyLinkAnchor.setVisible(true);
-        } else {
-            songInfo.setText("No song information available for the specified channel.");
-            spotifyLinkAnchor.setVisible(false);
-        }
+        songInfo.setText("🎶 " + artist + " - " + title + " (" + playedTime + ")");
+        spotifyLinkAnchor.setHref(spotifyLink);
+        spotifyLinkAnchor.setVisible(true);
+
+
     }
 }

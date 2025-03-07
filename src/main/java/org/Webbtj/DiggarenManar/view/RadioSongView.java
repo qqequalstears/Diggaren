@@ -7,7 +7,6 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.Webbtj.DiggarenManar.domain.RadioSong;
@@ -21,9 +20,8 @@ public class RadioSongView extends VerticalLayout {
     private final RadioService radioService;
     private final SpotifyService spotifyService;
 
-    private final ComboBox<String> channelSelector = new ComboBox<>("Välj Kanal");
+    private final ComboBox<String> channelSelector = new ComboBox<>("Select Channel");
     private final RadioButtonGroup<String> songTypeSelector = new RadioButtonGroup<>();
-
     private final Button fetchButton = new Button("Fetch Song");
     private final Label songInfo = new Label();
     private final Anchor spotifyLinkAnchor = new Anchor("", "Open in Spotify");
@@ -36,38 +34,39 @@ public class RadioSongView extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
 
-        channelSelector.setItems("P2 (163)", "P3 (164)", "P1 (132)");
-        channelSelector.setPlaceholder("Choose a channel");
+        channelSelector.setItems("P1 (132)", "P2 (163)", "P3 (134)");
+        channelSelector.setPlaceholder("Choose a Channel");
 
+        songTypeSelector.setLabel("Choose Song Type");
+        songTypeSelector.setItems("Current Song", "Latest Played Song");
+        songTypeSelector.setValue("Current Song"); // Default selection
 
-        fetchButton.addClickListener(e -> fetchCurrentSong());
+        fetchButton.addClickListener(e -> fetchSong());
 
-        add(new H1("Playing now"), channelSelector, fetchButton, songInfo, spotifyLinkAnchor);
+        add(new H1("Now Playing"), channelSelector, songTypeSelector, fetchButton, songInfo, spotifyLinkAnchor);
     }
 
-    private void fetchCurrentSong() {
-
-        String selectedChannedl = channelSelector.getValue();
-        if(selectedChannedl == null){
-            songInfo.setText("Choose a channel first!" );
+    private void fetchSong() {
+        String selectedChannel = channelSelector.getValue();
+        if (selectedChannel == null) {
+            songInfo.setText("select a channel first!");
             return;
         }
 
-        String channelId = selectedChannedl.split(" ")[1].replace("(", "").replace(")", "");
-        RadioSong radioSong = radioService.getCurrentSong(channelId);
+        String channelId = selectedChannel.split(" ")[1].replace("(", "").replace(")", "");
+        boolean fetchCurrent = songTypeSelector.getValue().equals("Current Song");
 
-        if (radioSong != null) {
-            String artist = radioSong.getArtist();
-            String title = radioSong.getTitle();
-            String playedTime = radioSong.getPlayedTime();
-            String spotifyLink = spotifyService.generateSpotifySearchLink(artist + " " + title);
+        System.out.println("🎵 Fetching: " + (fetchCurrent ? "Current Song" : "Latest Played Song"));
 
-            songInfo.setText("Now Playing: " + artist + " - " + title + " (" + playedTime + ")");
-            spotifyLinkAnchor.setHref(spotifyLink);
-            spotifyLinkAnchor.setVisible(true);
-        } else {
-            songInfo.setText("No song information available for the specified channel.");
-            spotifyLinkAnchor.setVisible(false);
-        }
+        RadioSong radioSong = radioService.getSongByType(channelId, fetchCurrent);
+
+        String artist = radioSong.getArtist();
+        String title = radioSong.getTitle();
+        String playedTime = radioSong.getPlayedTime();
+        String spotifyLink = spotifyService.generateSpotifySearchLink(artist + " " + title);
+
+        songInfo.setText("🎶" + artist + " - " + title + " (" + playedTime + ")");
+        spotifyLinkAnchor.setHref(spotifyLink);
+        spotifyLinkAnchor.setVisible(true);
     }
 }

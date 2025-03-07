@@ -1,6 +1,5 @@
 package org.Webbtj.DiggarenManar.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.Webbtj.DiggarenManar.domain.RadioSong;
@@ -15,61 +14,73 @@ import java.util.Collections;
 public class RadioService {
 
     private final RestTemplate restTemplate;
-    private static final String SR_API_URL = "http://api.sr.se/api/v2/playlists/rightnow?channelid="; // 🔹 **Lagt till konstanter för API URL**
+    private static final String SR_API_URL = "http://api.sr.se/api/v2/playlists/rightnow?channelid=";
 
     public RadioService() {
         this.restTemplate = new RestTemplate();
     }
 
-    public RadioSong getCurrentSong(String channel) {
-        String url = SR_API_URL + channel + "&format=json"; // 🔹 **Bygger korrekt API-URL**
+    public RadioSong getSongByType(String channel, boolean fetchCurrent) {
+        String url = SR_API_URL + channel + "&format=json";
+        System.out.println("API Request: " + url);
 
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             HttpEntity<String> entity = new HttpEntity<>(headers);
-
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-            // 🔹 **Logga API-svaret för debugging**
-            System.out.println("📡 API Response: " + response.getBody());
+            if (response.getStatusCode() != HttpStatus.OK) {
+                System.err.println("API returned status: " + response.getStatusCode());
+                return getDefaultSong();
+            }
 
-            // 🔹 **Konvertera JSON-svaret till ett objekt**
+            String responseBody = response.getBody();
+            System.out.println("API Response: " + responseBody);
+
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-
+            JsonNode jsonNode = objectMapper.readTree(responseBody);
             JsonNode playlistNode = jsonNode.path("playlist");
 
-            // 🔹 **Hämta låten om den finns, annars ta `previoussong`**
-            JsonNode songNode = playlistNode.path("song");
-            if (songNode.isMissingNode()) { // Om det inte finns en "song", ta "previoussong"
-                songNode = playlistNode.path("previoussong");
-            }
+            JsonNode currentSongNode = playlistNode.path("song");
+            JsonNode latestPlayedNode = playlistNode.path("previoussong");
 
-            if (!songNode.isMissingNode()) {
-                RadioSong radioSong = new RadioSong();
-                radioSong.setArtist(songNode.path("artist").asText("Okänd artist"));
-                radioSong.setTitle(songNode.path("title").asText("Okänd låt"));
-                radioSong.setPlayedTime(songNode.path("starttimeutc").asText("N/A"));
-                return radioSong;
+            // Log available data for debugging
+            System.out.println("Current Song Exists: " + !currentSongNode.isMissingNode());
+            System.out.println("Latest Played Exists: " + !latestPlayedNode.isMissingNode());
+
+            // Ensure we fetch the right type of song
+            JsonNode songNode;
+            if (fetchCurrent) {
+                songNode = currentSongNode; // Always use "song" for current song
             } else {
-                System.err.println("⚠️ Varken 'song' eller 'previoussong' hittades i API-svaret.");
+                // Use "previoussong" if available, otherwise return "song"
+                songNode = !latestPlayedNode.isMissingNode() ? latestPlayedNode : currentSongNode;
+                System.out.println("No `previoussong` found, using `song` instead.");
             }
 
-        } catch (JsonProcessingException e) { // 🔹 **Hantera JSON-fel**
-            System.err.println(" JSON-fel vid parsing av Sveriges Radio API: " + e.getMessage());
-        } catch (RestClientException e) { // 🔹 **Hantera nätverksfel**
-            System.err.println(" Fel vid anrop till Sveriges Radio API: " + e.getMessage());
-        } catch (Exception e) { // 🔹 **Hantera generella fel**
-            System.err.println(" Oväntat fel i RadioService: " + e.getMessage());
+            // Ensure the selected song is valid
+            if (!songNode.isMissingNode() && songNode.has("title") && songNode.has("artist")) {
+                return new RadioSong(
+                        songNode.path("title").asText("Unknown Song"),
+                        songNode.path("artist").asText("Unknown Artist"),
+                        songNode.path("starttimeutc").asText("N/A")
+                );
+            } else {
+                System.err.println("No valid song found in API for: " + (fetchCurrent ? "Current Song" : "Latest Played Song"));
+            }
+
+        } catch (RestClientException e) {
+            System.err.println("API request error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
         }
 
-        // 🔹 **Om vi misslyckas, returnera en placeholder-låt istället för null**
-        RadioSong fallbackSong = new RadioSong();
-        fallbackSong.setArtist("Okänd artist");
-        fallbackSong.setTitle("Ingen låt hittades");
-        fallbackSong.setPlayedTime("N/A");
+        return getDefaultSong();
+    }
 
-        return fallbackSong;
+
+    private RadioSong getDefaultSong() {
+        return new RadioSong("Song not found", "Unknown Artist", "N/A");
     }
 }

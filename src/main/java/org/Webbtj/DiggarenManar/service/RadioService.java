@@ -8,6 +8,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import java.util.Collections;
 
@@ -22,7 +25,7 @@ public class RadioService {
     }
 
     public RadioSong getCurrentSong(String channel) {
-        String url = SR_API_URL + channel + "&format=json"; // 🔹 **Bygger korrekt API-URL**
+        String url = SR_API_URL + channel + "&format=json";
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -30,19 +33,12 @@ public class RadioService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-            // 🔹 **Logga API-svaret för debugging**
-            System.out.println("📡 API Response: " + response.getBody());
-
-            // 🔹 **Konvertera JSON-svaret till ett objekt**
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
 
             JsonNode playlistNode = jsonNode.path("playlist");
-
-            // 🔹 **Hämta låten om den finns, annars ta `previoussong`**
             JsonNode songNode = playlistNode.path("song");
-            if (songNode.isMissingNode()) { // Om det inte finns en "song", ta "previoussong"
+            if (songNode.isMissingNode()) {
                 songNode = playlistNode.path("previoussong");
             }
 
@@ -50,26 +46,34 @@ public class RadioService {
                 RadioSong radioSong = new RadioSong();
                 radioSong.setArtist(songNode.path("artist").asText("Okänd artist"));
                 radioSong.setTitle(songNode.path("title").asText("Okänd låt"));
-                radioSong.setPlayedTime(songNode.path("starttimeutc").asText("N/A"));
+                radioSong.setPlayedTime(convertUnixTime(songNode.path("starttimeutc").asText("N/A"))); // 🔹 NYA KODEN!
                 return radioSong;
             } else {
-                System.err.println("⚠️ Varken 'song' eller 'previoussong' hittades i API-svaret.");
+                System.err.println("⚠️ Ingen låt hittades.");
             }
 
-        } catch (JsonProcessingException e) { // 🔹 **Hantera JSON-fel**
-            System.err.println(" JSON-fel vid parsing av Sveriges Radio API: " + e.getMessage());
-        } catch (RestClientException e) { // 🔹 **Hantera nätverksfel**
-            System.err.println(" Fel vid anrop till Sveriges Radio API: " + e.getMessage());
-        } catch (Exception e) { // 🔹 **Hantera generella fel**
-            System.err.println(" Oväntat fel i RadioService: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println(" Fel vid hämtning av låtdata: " + e.getMessage());
         }
 
-        // 🔹 **Om vi misslyckas, returnera en placeholder-låt istället för null**
-        RadioSong fallbackSong = new RadioSong();
-        fallbackSong.setArtist("Okänd artist");
-        fallbackSong.setTitle("Ingen låt hittades");
-        fallbackSong.setPlayedTime("N/A");
+        return null;
+    }
+    public String convertUnixTime(String unixTime) {
+        try {
+            // 🔹 Extrahera siffrorna från "/Date(1741172586000)/"
+            String timestampStr = unixTime.replaceAll("[^0-9]", "");
+            long timestamp = Long.parseLong(timestampStr);
 
-        return fallbackSong;
+            // 🔹 Skapa en Date från Unix-tiden
+            Date date = new Date(timestamp);
+
+            // 🔹 Formatera tiden i HH:mm:ss
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Stockholm")); // 🔹 Använd svensk tidzon
+
+            return sdf.format(date);
+        } catch (Exception e) {
+            return "Okänt klockslag";
+        }
     }
 }

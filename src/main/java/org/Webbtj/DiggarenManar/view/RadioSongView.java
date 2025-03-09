@@ -64,12 +64,15 @@ public class RadioSongView extends VerticalLayout {
         boolean fetchCurrent = songTypeSelector.getValue().equals("Current song");
 
         RadioSong radioSong = radioService.getSongByType(channelId, fetchCurrent);
-        if (radioSong == null) {
-            songInfo.setText("song not found on this channel");
+        if (radioSong == null || radioSong.getTitle().equalsIgnoreCase("Song not found") ||
+                radioSong.getArtist().equalsIgnoreCase("Unknown artist")) {
+
+            songInfo.setText("No song is currently playing on this channel.");
+            albumInfo.setText("");
+            releaseDateInfo.setText("");
             spotifyLinkAnchor.setVisible(false);
             return;
         }
-
         Map<String, String> spotifyData = spotifyService.searchTrackDetails(radioSong.getArtist() + " " + radioSong.getTitle());
 
         songInfo.setText("🎵 " + spotifyData.getOrDefault("artist", "Unknown Artist") + " - " +

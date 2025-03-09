@@ -66,12 +66,19 @@ public class RadioSong {
     public void setChannelName(String channelName) {
         this.channelName = channelName;
     }
-    public String convertToTime(String time) {
-        String numericPart = time.substring(6, time.length() - 2);
-        long epochMillis = Long.parseLong(numericPart);
+    private String convertToTime(String rawTimestamp) {
+        if (rawTimestamp == null || rawTimestamp.length() < 8 || !rawTimestamp.contains("Date")) {
+            return "N/A";
+        }
 
-        Instant instant = Instant.ofEpochMilli(epochMillis);
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-        return localDateTime.toString();
+        try {
+            String millisString = rawTimestamp.substring(6, rawTimestamp.length() - 2);
+            long millis = Long.parseLong(millisString);
+            return java.time.Instant.ofEpochMilli(millis).toString();
+        } catch (Exception e) {
+            System.err.println("⚠️ Failed to parse timestamp: " + rawTimestamp);
+            return "N/A";
+        }
     }
+
 }

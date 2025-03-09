@@ -13,8 +13,8 @@ import java.util.Base64;
 @Service
 
 public class spotifyAuthService {
-    private static final String CLIENT_ID = "b4a42a288a4647cca57ca5149615acb0";
-    private static final String CLIENT_SECRET = "d6b7a222f8e54a298665e77220bc5a1f";
+    private static final String CLIENT_ID = "Write_your_ID";
+    private static final String CLIENT_SECRET = "write_your_secret";
     private static final String TOKEN_URL = "https://accounts.spotify.com/api/token";
     private String accessToken;
     private long tokenExpirationTime = 0;

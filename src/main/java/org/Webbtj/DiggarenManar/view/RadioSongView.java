@@ -2,9 +2,7 @@ package org.Webbtj.DiggarenManar.view;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.router.PageTitle;
@@ -29,14 +27,19 @@ public class RadioSongView extends VerticalLayout {
     private final Label albumInfo = new Label();
     private final Label releaseDateInfo = new Label();
     private final Anchor spotifyLinkAnchor = new Anchor("", "Open in Spotify");
+    private Div logo = new Div();
 
     public RadioSongView(RadioService radioService, SpotifyServi spotifyService) {
         this.radioService = radioService;
         this.spotifyService = spotifyService;
 
+        getStyle().set("background-color", "#ff7f27");
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
+
+        Image logoType = new Image("images/DiggarHead.png", "Diggaren Manar logo");
+        logo.add(logoType);
 
         channelSelector.setItems("P2 (163)", "P3 (164)", "P1 (132)");
         channelSelector.setPlaceholder("Choose a channel");
@@ -46,8 +49,8 @@ public class RadioSongView extends VerticalLayout {
         songTypeSelector.setValue("Current song");
 
         fetchButton.addClickListener(e -> fetchSong());
-
-        add(new H1("Diggaren"), channelSelector, songTypeSelector, fetchButton, songInfo, albumInfo, releaseDateInfo, spotifyLinkAnchor);
+        add(logo);
+        add(new H1(""), channelSelector, songTypeSelector, fetchButton, songInfo, albumInfo, releaseDateInfo, spotifyLinkAnchor);
     }
 
     private void fetchSong() {

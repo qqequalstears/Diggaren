@@ -24,6 +24,7 @@ public class RadioSongView extends VerticalLayout {
     private final RadioButtonGroup<String> songTypeSelector = new RadioButtonGroup<>();
     private final Button fetchButton = new Button("Fetch Song");
     private final Label songInfo = new Label();
+    private final Label timePlayed = new Label();
     private final Label albumInfo = new Label();
     private final Label releaseDateInfo = new Label();
     private final Anchor spotifyLinkAnchor = new Anchor("", "Open in Spotify");
@@ -50,7 +51,7 @@ public class RadioSongView extends VerticalLayout {
 
         fetchButton.addClickListener(e -> fetchSong());
         add(logo);
-        add(new H1(""), channelSelector, songTypeSelector, fetchButton, songInfo, albumInfo, releaseDateInfo, spotifyLinkAnchor);
+        add(new H1(""), channelSelector, songTypeSelector, fetchButton, songInfo,timePlayed, albumInfo, releaseDateInfo, spotifyLinkAnchor);
     }
 
     private void fetchSong() {
@@ -77,6 +78,7 @@ public class RadioSongView extends VerticalLayout {
 
         songInfo.setText("🎵 " + spotifyData.getOrDefault("artist", "Unknown Artist") + " - " +
                 spotifyData.getOrDefault("trackName", "Unknown Song"));
+        timePlayed.setText("Played at: " + radioSong.getPlayedTime());
 
         albumInfo.setText("Album: " + spotifyData.getOrDefault("album", "Unknown Album"));
         releaseDateInfo.setText("Release date: " + spotifyData.getOrDefault("releaseDate", "Unknown"));

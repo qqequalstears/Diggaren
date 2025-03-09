@@ -8,6 +8,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 
 public class RadioSong {
@@ -74,7 +75,10 @@ public class RadioSong {
         try {
             String millisString = rawTimestamp.substring(6, rawTimestamp.length() - 2);
             long millis = Long.parseLong(millisString);
-            return java.time.Instant.ofEpochMilli(millis).toString();
+            Instant instant = Instant.ofEpochMilli(millis);
+            LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            return dateTime.format(timeFormatter);
         } catch (Exception e) {
             System.err.println("⚠️ Failed to parse timestamp: " + rawTimestamp);
             return "N/A";

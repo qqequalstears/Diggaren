@@ -70,7 +70,7 @@ public class RadioSongView extends VerticalLayout {
         // Fetch detailed song data from Spotify API
         Map<String, String> spotifyData = spotifyService.searchTrackDetails(radioSong.getArtist() + " " + radioSong.getTitle());
 
-        songInfo.setText("🎵 " + spotifyData.getOrDefault("spotifyArtist", "Unknown Artist") + " - " +
+        songInfo.setText("🎵 " + spotifyData.getOrDefault("artist", "Unknown Artist") + " - " +
                 spotifyData.getOrDefault("trackName", "Unknown Song"));
 
         albumInfo.setText("Album: " + spotifyData.getOrDefault("album", "Unknown Album"));

@@ -16,7 +16,7 @@ public class DiggarenAPI {
     public DiggarenAPI(String title, String artist, String playedTime) {
         this.title = title;
         this.artist = artist;
-        this.playedTime = convertToTime(playedTime);
+        this.playedTime = playedTime;//convertToTime(playedTime);
 
     }
 
@@ -41,7 +41,7 @@ public class DiggarenAPI {
     }
 
     public void setPlayedTime(String playedTime) {
-        this.playedTime = convertToTime(playedTime);
+        this.playedTime = playedTime;//convertToTime(playedTime);
     }
 
     public String getChannelName() {

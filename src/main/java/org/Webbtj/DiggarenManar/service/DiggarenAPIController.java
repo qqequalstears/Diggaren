@@ -13,14 +13,16 @@ public class DiggarenAPIController {
 
     private final RadioService radioService;
     private final SpotifyServi spotifyService;
+    private final spotifyAuthService spotifyAuthService;
 
-    public DiggarenAPIController(RadioService radioService, SpotifyServi spotifyService) {
+    public DiggarenAPIController(RadioService radioService, SpotifyServi spotifyService, spotifyAuthService spotifyAuthService) {
         this.radioService = radioService;
         this.spotifyService = spotifyService;
+        this.spotifyAuthService = spotifyAuthService;
     }
 
-    @GetMapping("/songinfo/{songType}")
-    public DiggarenAPI getSongInfo(@PathVariable String songType, @RequestParam String channel) {
+    @GetMapping("/songinfo/{songType}/{channel}")
+    public DiggarenAPI getSongInfo(@PathVariable String songType, @PathVariable String channel) {
         boolean fetchCurrent = "currentsong".equalsIgnoreCase(songType);
         RadioSong radioSong = radioService.getSongByType(channel, fetchCurrent);
         if (radioSong == null) {
@@ -38,4 +40,25 @@ public class DiggarenAPIController {
 
         return diggarenAPI;
     }
+    @PostMapping("/spotify/token")
+    public String spotifyToken() {
+        return spotifyAuthService.getAccessToken();
+    }
+
+    @GetMapping("/spotify/search/{query}")
+    public Map<String, String> searchTrackDetails(@PathVariable String query) {
+
+        return spotifyService.searchTrackDetails(query);
+    }
+
+    @GetMapping ("/sr/currentsong/{channel}")
+    public RadioSong getSRCurrentSong(@PathVariable String channel){
+        return radioService.getSongByType(channel, true);
+    }
+
+    @GetMapping("/sr/previoussong/{channel}")
+    public RadioSong getSRPreviousSong(@PathVariable String channel){
+        return radioService.getSongByType(channel, false);
+    }
+
 }

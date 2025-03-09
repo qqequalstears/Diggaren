@@ -60,7 +60,9 @@ public class RadioService {
                 return new RadioSong(
                         songNode.path("title").asText("Unknown Song"),
                         songNode.path("artist").asText("Unknown Artist"),
-                        songNode.path("starttimeutc").asText("N/A")
+                        songNode.path("starttimeutc").asText("N/A"),
+                        channel
+
                 );
             } else {
                 System.err.println("No valid song found in API for: " + (fetchCurrent ? "Current Song" : "Latest Played Song"));
@@ -77,6 +79,6 @@ public class RadioService {
 
 
     private RadioSong getDefaultSong() {
-        return new RadioSong("Song not found", "Unknown Artist", "N/A");
+        return new RadioSong("Song not found", "Unknown Artist", "N/A","N/A");
     }
 }

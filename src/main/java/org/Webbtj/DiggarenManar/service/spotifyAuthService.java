@@ -6,17 +6,21 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
 
 @Service
+
 public class spotifyAuthService {
     private static final String CLIENT_ID = "b4a42a288a4647cca57ca5149615acb0";
     private static final String CLIENT_SECRET = "d6b7a222f8e54a298665e77220bc5a1f";
     private static final String TOKEN_URL = "https://accounts.spotify.com/api/token";
     private String accessToken;
     private long tokenExpirationTime = 0;
+
 
     public String getAccessToken() {
         if (System.currentTimeMillis() < tokenExpirationTime) {

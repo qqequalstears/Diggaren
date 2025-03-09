@@ -5,24 +5,36 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.xml.bind.annotation.XmlElement;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 
 public class RadioSong {
     private String title;
     private String artist;
-    private String startTime;
-    private String endTime;
     private String playedTime;
+    private String channelName;
 
 
+    public RadioSong() {
+    }
 
-    public RadioSong() {}
-
-    public RadioSong(String title, String artist, String playedTime) {
+    public RadioSong(String title, String artist, String playedTime, String channelName) {
         this.title = title;
         this.artist = artist;
-        this.playedTime = playedTime;
+        this.playedTime = convertToTime(playedTime);
+        if(channelName.equals("164")){
+            channelName = "P3";
+        }else if(channelName.equals("163")){
+            channelName = "P2";}
+        else if(channelName.equals("132")){
+            channelName = "P1";
+        }
+        this.channelName = channelName;
+
     }
-    @XmlElement
+
     public String getTitle() {
         return title;
     }
@@ -30,7 +42,7 @@ public class RadioSong {
     public void setTitle(String title) {
         this.title = title;
     }
-    @XmlElement
+
     public String getArtist() {
         return artist;
     }
@@ -47,21 +59,19 @@ public class RadioSong {
         this.playedTime = playedTime;
     }
 
-    @XmlElement
-    public String getStartTime() {
-        return startTime;
+    public String getChannelName() {
+        return channelName;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setChannelName(String channelName) {
+        this.channelName = channelName;
     }
-    @XmlElement
-    public String getEndTime() {
-        return endTime;
-    }
+    public String convertToTime(String time) {
+        String numericPart = time.substring(6, time.length() - 2);
+        long epochMillis = Long.parseLong(numericPart);
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+        Instant instant = Instant.ofEpochMilli(epochMillis);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return localDateTime.toString();
     }
-
 }

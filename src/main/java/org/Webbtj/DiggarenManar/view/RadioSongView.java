@@ -47,7 +47,7 @@ public class RadioSongView extends VerticalLayout {
 
         fetchButton.addClickListener(e -> fetchSong());
 
-        add(new H1("Now Playing"), channelSelector, songTypeSelector, fetchButton, songInfo, albumInfo, releaseDateInfo, spotifyLinkAnchor);
+        add(new H1("Diggaren"), channelSelector, songTypeSelector, fetchButton, songInfo, albumInfo, releaseDateInfo, spotifyLinkAnchor);
     }
 
     private void fetchSong() {

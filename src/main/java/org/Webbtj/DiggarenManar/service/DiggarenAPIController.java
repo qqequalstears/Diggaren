@@ -3,10 +3,7 @@ package org.Webbtj.DiggarenManar.service;
 
 import org.Webbtj.DiggarenManar.domain.DiggarenAPI;
 import org.Webbtj.DiggarenManar.domain.RadioSong;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -22,8 +19,9 @@ public class DiggarenAPIController {
         this.spotifyService = spotifyService;
     }
 
-    @GetMapping("/songinfo")
-    public DiggarenAPI getSongInfo(@RequestParam String channel, @RequestParam boolean fetchCurrent) {
+    @GetMapping("/songinfo/{songType}")
+    public DiggarenAPI getSongInfo(@PathVariable String songType, @RequestParam String channel) {
+        boolean fetchCurrent = "currentsong".equalsIgnoreCase(songType);
         RadioSong radioSong = radioService.getSongByType(channel, fetchCurrent);
         if (radioSong == null) {
             return new DiggarenAPI("No song found:(", "", "");

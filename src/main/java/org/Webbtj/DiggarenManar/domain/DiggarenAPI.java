@@ -1,11 +1,13 @@
 package org.Webbtj.DiggarenManar.domain;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 public class DiggarenAPI {
     private String title;
     private String artist;
     private String playedTime;
-    private String startTime;
-    private String endTime;
     private String channelName;
     private String spotifyLink;
 
@@ -14,7 +16,8 @@ public class DiggarenAPI {
     public DiggarenAPI(String title, String artist, String playedTime) {
         this.title = title;
         this.artist = artist;
-        this.playedTime = playedTime;
+        this.playedTime = convertToTime(playedTime);
+
     }
 
     public String getTitle() {
@@ -38,23 +41,7 @@ public class DiggarenAPI {
     }
 
     public void setPlayedTime(String playedTime) {
-        this.playedTime = playedTime;
-    }
-
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
-    }
-
-    public String getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+        this.playedTime = convertToTime(playedTime);
     }
 
     public String getChannelName() {
@@ -62,6 +49,13 @@ public class DiggarenAPI {
     }
 
     public void setChannelName(String channelName) {
+        if(channelName.equals("164")){
+            channelName = "P3";
+        }else if(channelName.equals("163")){
+            channelName = "P2";}
+        else if(channelName.equals("132")){
+            channelName = "P1";
+        }
         this.channelName = channelName;
     }
 
@@ -71,5 +65,13 @@ public class DiggarenAPI {
 
     public void setSpotifyLink(String spotifyLink) {
         this.spotifyLink = spotifyLink;
+    }
+    public String convertToTime(String time) {
+        String numericPart = time.substring(6, time.length() - 2);
+        long epochMillis = Long.parseLong(numericPart);
+
+        Instant instant = Instant.ofEpochMilli(epochMillis);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return localDateTime.toString();
     }
 }

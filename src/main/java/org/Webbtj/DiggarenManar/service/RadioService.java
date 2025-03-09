@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
+import java.util.TimeZone;
 
 @Service
 public class RadioService {
@@ -45,42 +48,49 @@ public class RadioService {
             JsonNode currentSongNode = playlistNode.path("song");
             JsonNode latestPlayedNode = playlistNode.path("previoussong");
 
-            // Log available data for debugging
-            System.out.println("Current Song Exists: " + !currentSongNode.isMissingNode());
-            System.out.println("Latest Played Exists: " + !latestPlayedNode.isMissingNode());
-
-            // Ensure we fetch the right type of song
-            JsonNode songNode;
-            if (fetchCurrent) {
-                songNode = currentSongNode; // Always use "song" for current song
-            } else {
-                // Use "previoussong" if available, otherwise return "song"
+            // Kontrollera vilken låt vi ska hämta
+            JsonNode songNode = fetchCurrent ? currentSongNode : latestPlayedNode;
+            if (songNode.isMissingNode()) {
                 songNode = !latestPlayedNode.isMissingNode() ? latestPlayedNode : currentSongNode;
-                System.out.println("No `previoussong` found, using `song` instead.");
             }
 
-            // Ensure the selected song is valid
+            // Kontrollera om låten har nödvändig data
             if (!songNode.isMissingNode() && songNode.has("title") && songNode.has("artist")) {
                 return new RadioSong(
-                        songNode.path("title").asText("Unknown Song"),
-                        songNode.path("artist").asText("Unknown Artist"),
-                        songNode.path("starttimeutc").asText("N/A")
+                        songNode.path("title").asText("Okänd låt"),
+                        songNode.path("artist").asText("Okänd artist"),
+                        convertUnixTime(songNode.path("starttimeutc").asText("N/A")) // 🔹 Konvertera klockslag
                 );
             } else {
-                System.err.println("No valid song found in API for: " + (fetchCurrent ? "Current Song" : "Latest Played Song"));
+                System.err.println(" Ingen giltig låt hittades för: " + (fetchCurrent ? "Nuvarande låt" : "Senaste spelade låt"));
             }
 
         } catch (RestClientException e) {
-            System.err.println("API request error: " + e.getMessage());
+            System.err.println(" API-fel: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Unexpected error: " + e.getMessage());
+            System.err.println(" Oväntat fel: " + e.getMessage());
         }
 
         return getDefaultSong();
     }
 
+    // 🔹 Konvertera Unix-tid till läsbart format (HH:mm:ss)
+    private String convertUnixTime(String unixTime) {
+        try {
+            String timestampStr = unixTime.replaceAll("[^0-9]", "");
+            long timestamp = Long.parseLong(timestampStr);
+
+            Date date = new Date(timestamp);
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Stockholm"));
+
+            return sdf.format(date);
+        } catch (Exception e) {
+            return "Okänt klockslag";
+        }
+    }
 
     private RadioSong getDefaultSong() {
-        return new RadioSong("Song not found", "Unknown Artist", "N/A");
+        return new RadioSong("Låt ej hittad", "Okänd artist", "N/A");
     }
 }

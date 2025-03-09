@@ -11,22 +11,26 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.Webbtj.DiggarenManar.domain.RadioSong;
 import org.Webbtj.DiggarenManar.service.RadioService;
-import org.Webbtj.DiggarenManar.service.SpotifyService;
+import org.Webbtj.DiggarenManar.service.SpotifyServi;
+
+import java.util.Map;
 
 @Route("radiosong")
 @PageTitle("Current Radio Song | Diggaren Manar")
 public class RadioSongView extends VerticalLayout {
 
     private final RadioService radioService;
-    private final SpotifyService spotifyService;
+    private final SpotifyServi spotifyService;
 
     private final ComboBox<String> channelSelector = new ComboBox<>("Select Channel");
     private final RadioButtonGroup<String> songTypeSelector = new RadioButtonGroup<>();
     private final Button fetchButton = new Button("Fetch Song");
     private final Label songInfo = new Label();
+    private final Label albumInfo = new Label();
+    private final Label releaseDateInfo = new Label();
     private final Anchor spotifyLinkAnchor = new Anchor("", "Open in Spotify");
 
-    public RadioSongView(RadioService radioService, SpotifyService spotifyService) {
+    public RadioSongView(RadioService radioService, SpotifyServi spotifyService) {
         this.radioService = radioService;
         this.spotifyService = spotifyService;
 
@@ -34,39 +38,50 @@ public class RadioSongView extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
 
-        channelSelector.setItems("P1 (132)", "P2 (163)", "P3 (134)");
-        channelSelector.setPlaceholder("Choose a Channel");
+        channelSelector.setItems("P2 (163)", "P3 (164)", "P1 (132)");
+        channelSelector.setPlaceholder("Choose a channel");
 
-        songTypeSelector.setLabel("Choose Song Type");
-        songTypeSelector.setItems("Current Song", "Latest Played Song");
-        songTypeSelector.setValue("Current Song"); // Default selection
+        songTypeSelector.setLabel("Choose song type");
+        songTypeSelector.setItems("Current song", "Latest played song");
+        songTypeSelector.setValue("Current song");
 
         fetchButton.addClickListener(e -> fetchSong());
 
-        add(new H1("Now Playing"), channelSelector, songTypeSelector, fetchButton, songInfo, spotifyLinkAnchor);
+        add(new H1("Now Playing"), channelSelector, songTypeSelector, fetchButton, songInfo, albumInfo, releaseDateInfo, spotifyLinkAnchor);
     }
 
     private void fetchSong() {
         String selectedChannel = channelSelector.getValue();
         if (selectedChannel == null) {
-            songInfo.setText("select a channel first!");
+            songInfo.setText("Select a channel!!");
             return;
         }
 
         String channelId = selectedChannel.split(" ")[1].replace("(", "").replace(")", "");
-        boolean fetchCurrent = songTypeSelector.getValue().equals("Current Song");
-
-        System.out.println("🎵 Fetching: " + (fetchCurrent ? "Current Song" : "Latest Played Song"));
+        boolean fetchCurrent = songTypeSelector.getValue().equals("Current song");
 
         RadioSong radioSong = radioService.getSongByType(channelId, fetchCurrent);
+        if (radioSong == null) {
+            songInfo.setText("song not found on this channel");
+            spotifyLinkAnchor.setVisible(false);
+            return;
+        }
 
-        String artist = radioSong.getArtist();
-        String title = radioSong.getTitle();
-        String playedTime = radioSong.getPlayedTime();
-        String spotifyLink = spotifyService.generateSpotifySearchLink(artist + " " + title);
+        // Fetch detailed song data from Spotify API
+        Map<String, String> spotifyData = spotifyService.searchTrackDetails(radioSong.getArtist() + " " + radioSong.getTitle());
 
-        songInfo.setText("🎶" + artist + " - " + title + " (" + playedTime + ")");
-        spotifyLinkAnchor.setHref(spotifyLink);
-        spotifyLinkAnchor.setVisible(true);
+        songInfo.setText("🎵 " + spotifyData.getOrDefault("artist", "Unknown Artist") + " - " +
+                spotifyData.getOrDefault("trackName", "Unknown Song"));
+
+        albumInfo.setText("Album: " + spotifyData.getOrDefault("album", "Unknown Album"));
+        releaseDateInfo.setText("Release date: " + spotifyData.getOrDefault("releaseDate", "Unknown"));
+
+        String spotifyUrl = spotifyData.getOrDefault("spotifyUrl", "");
+        if (!spotifyUrl.isEmpty()) {
+            spotifyLinkAnchor.setHref(spotifyUrl);
+            spotifyLinkAnchor.setVisible(true);
+        } else {
+            spotifyLinkAnchor.setVisible(false);
+        }
     }
 }

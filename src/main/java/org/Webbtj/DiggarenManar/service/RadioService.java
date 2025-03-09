@@ -45,21 +45,17 @@ public class RadioService {
             JsonNode currentSongNode = playlistNode.path("song");
             JsonNode latestPlayedNode = playlistNode.path("previoussong");
 
-            // Log available data for debugging
             System.out.println("Current Song Exists: " + !currentSongNode.isMissingNode());
             System.out.println("Latest Played Exists: " + !latestPlayedNode.isMissingNode());
 
-            // Ensure we fetch the right type of song
             JsonNode songNode;
             if (fetchCurrent) {
-                songNode = currentSongNode; // Always use "song" for current song
+                songNode = currentSongNode;
             } else {
-                // Use "previoussong" if available, otherwise return "song"
                 songNode = !latestPlayedNode.isMissingNode() ? latestPlayedNode : currentSongNode;
                 System.out.println("No `previoussong` found, using `song` instead.");
             }
 
-            // Ensure the selected song is valid
             if (!songNode.isMissingNode() && songNode.has("title") && songNode.has("artist")) {
                 return new RadioSong(
                         songNode.path("title").asText("Unknown Song"),

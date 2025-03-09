@@ -55,10 +55,7 @@
                 <artifactId>mariadb-java-client</artifactId>
                 <version>3.4.1</version>
             </dependency>
-            <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-            </dependency>
+
             <!-- Jakarta XML Binding API -->
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>

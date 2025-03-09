@@ -13,19 +13,4 @@ public class DiggarenManarApplication {
         SpringApplication.run(DiggarenManarApplication.class, args);
     }
 
-
-    /**
-     * Endast test för att se att det fungerar att lägga till en user i databasen.
-     * @param userService
-     * @return
-     */
-    /*
-    @Bean
-    CommandLineRunner run(UserService userService) {
-        return args -> {
-            userService.createUser("Testsson", "Testsson", "Testsson@email.com");
-            System.out.println("✅ User added!");
-        };
-    }
-    */
 }

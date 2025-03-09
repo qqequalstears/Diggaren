@@ -18,9 +18,7 @@ public class RestClientConfig {
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-        // Add the Jaxb2RootElementHttpMessageConverter to handle XML responses
         messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
-        // Add a StringHttpMessageConverter to handle plain text responses
         messageConverters.add(new StringHttpMessageConverter());
         restTemplate.setMessageConverters(messageConverters);
         return restTemplate;

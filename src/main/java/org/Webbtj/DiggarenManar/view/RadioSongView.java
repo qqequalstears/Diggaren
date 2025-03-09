@@ -15,7 +15,7 @@ import org.Webbtj.DiggarenManar.service.SpotifyServi;
 
 import java.util.Map;
 
-@Route("radiosong")
+@Route("")
 @PageTitle("Current Radio Song | Diggaren Manar")
 public class RadioSongView extends VerticalLayout {
 
@@ -67,7 +67,6 @@ public class RadioSongView extends VerticalLayout {
             return;
         }
 
-        // Fetch detailed song data from Spotify API
         Map<String, String> spotifyData = spotifyService.searchTrackDetails(radioSong.getArtist() + " " + radioSong.getTitle());
 
         songInfo.setText("🎵 " + spotifyData.getOrDefault("artist", "Unknown Artist") + " - " +

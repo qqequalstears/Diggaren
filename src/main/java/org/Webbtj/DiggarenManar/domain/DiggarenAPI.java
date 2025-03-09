@@ -1,28 +1,22 @@
 package org.Webbtj.DiggarenManar.domain;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.xml.bind.annotation.XmlElement;
-
-
-public class RadioSong {
+public class DiggarenAPI {
     private String title;
     private String artist;
+    private String playedTime;
     private String startTime;
     private String endTime;
-    private String playedTime;
+    private String channelName;
+    private String spotifyLink;
 
+    public DiggarenAPI() {}
 
-
-    public RadioSong() {}
-
-    public RadioSong(String title, String artist, String playedTime) {
+    public DiggarenAPI(String title, String artist, String playedTime) {
         this.title = title;
         this.artist = artist;
         this.playedTime = playedTime;
     }
-    @XmlElement
+
     public String getTitle() {
         return title;
     }
@@ -30,7 +24,7 @@ public class RadioSong {
     public void setTitle(String title) {
         this.title = title;
     }
-    @XmlElement
+
     public String getArtist() {
         return artist;
     }
@@ -47,7 +41,6 @@ public class RadioSong {
         this.playedTime = playedTime;
     }
 
-    @XmlElement
     public String getStartTime() {
         return startTime;
     }
@@ -55,7 +48,7 @@ public class RadioSong {
     public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
-    @XmlElement
+
     public String getEndTime() {
         return endTime;
     }
@@ -64,4 +57,19 @@ public class RadioSong {
         this.endTime = endTime;
     }
 
+    public String getChannelName() {
+        return channelName;
+    }
+
+    public void setChannelName(String channelName) {
+        this.channelName = channelName;
+    }
+
+    public String getSpotifyLink() {
+        return spotifyLink;
+    }
+
+    public void setSpotifyLink(String spotifyLink) {
+        this.spotifyLink = spotifyLink;
+    }
 }

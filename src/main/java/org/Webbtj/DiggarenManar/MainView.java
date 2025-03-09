@@ -1,5 +1,6 @@
 package org.Webbtj.DiggarenManar;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Label;
@@ -17,7 +18,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-@Route("")
+@Route("main")
 public class MainView extends VerticalLayout {
 
     private TextField channelField;
@@ -26,6 +27,7 @@ public class MainView extends VerticalLayout {
     private Anchor spotifyLinkAnchor;
 
     public MainView() {
+
         channelField = new TextField("Ange radiokanal");
         fetchButton = new Button("Hämta låt");
         songInfo = new Label();
@@ -34,6 +36,9 @@ public class MainView extends VerticalLayout {
 
         fetchButton.addClickListener(e -> fetchSong());
         add(channelField, fetchButton, songInfo, spotifyLinkAnchor);
+
+
+        UI.getCurrent().navigate("radiosong");
     }
 
     private void fetchSong() {
